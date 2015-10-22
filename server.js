@@ -29,15 +29,22 @@ let fileAccess = (filepath) => {
   });
 };
 
-let fileReader = (filepath) => {
+let fileStreamer = (filepath) => {
   return new Promise((resolve, reject) => {
-    fs.readFile(filepath, (error, content) => {
-      if (!error) {
-        resolve(content);
-      } else {
-        reject(error);
-      }
+
+    // creating a stream
+    let fileStream = fs.createReadStream(filepath);
+
+    // listening for the open event
+    fileStream.on('open', () => {
+      resolve(fileStream);
     });
+
+    // listening for the error event
+    fileStream.on('error', () => {
+      reject(error);
+    });
+
   });
 };
 
@@ -62,10 +69,11 @@ let staticServer = (req, res) => {
 
   // invoke the fileAccess() with the filePath var to start the Promise
   fileAccess(filePath) // if resolve invoke fileReader & pass filePath
-    .then(fileReader) // if resolve return the content
-    .then((content) => {
+    .then(fileStreamer) // if resolve return the content
+    .then((fileStream) => {
       res.writeHead(200, {'Content-type': contentType});
-      res.end(content, 'utf-8');
+      // res.end(content, 'utf-8');
+      fileStream.pipe(res);
     })
     .catch((error) => {
       res.writeHead(404);
