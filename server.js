@@ -56,7 +56,7 @@ let staticServer = (req, res) => {
   // Getting the file path
   // if route reqest is '/', then load 'index.html'
   // else use whatever route request is given
-  let filePath = __dirname + (baseURI.pathname === '/' ?  '/index.html' : baseURI.pathname);
+  let filePath = __dirname + (baseURI.pathname === '/' ?  '/client/index.html' : '/client' + baseURI.pathname);
 
   // getting the content-type by using file extension from file
   let contentType = contentTypes[path.extname(filePath)];
@@ -72,7 +72,6 @@ let staticServer = (req, res) => {
     .then(fileStreamer) // if resolve return the content
     .then((fileStream) => {
       res.writeHead(200, {'Content-type': contentType});
-      // res.end(content, 'utf-8');
       fileStream.pipe(res);
     })
     .catch((error) => {
